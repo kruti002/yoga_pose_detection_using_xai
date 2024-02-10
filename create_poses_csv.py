@@ -32,7 +32,7 @@ pose_name.append("pose")
 
 pose_list = []
 
-main_dir = "./poses_dataset/Images"
+main_dir = r'C:\research_paper\research paper\yoga-pose-detection-correction-main\poses_dataset\Images'
 pose_dir_list = os.listdir(main_dir)
 
 for i in range(0, len(pose_dir_list)):
