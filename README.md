@@ -1,4 +1,5 @@
-# Yoga Pose Detection and Correction College Project
+# Yoga Pose Detection and Correction 
+
 
 #### Setup
 1. Create a python virtual environment.
