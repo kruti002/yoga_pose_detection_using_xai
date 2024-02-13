@@ -1,16 +1,40 @@
 import cv2
 import os
 import matplotlib.pyplot as plt
+import mediapipe as mp
 
-def extract_and_display_frames_realtime(output_folder, frame_interval=20):
+def is_useful_frame(frame, mp_pose):
     """
-    Extract frames from real-time camera feed, save them as images, and display them using subplots.
+    Check if a frame contains a specific yoga pose.
+    
+    Parameters:
+    - frame (numpy.ndarray): Image frame.
+    - mp_pose (mediapipe.solutions.pose): Pose detection model.
+    
+    Returns:
+    - bool: True if the frame is useful, False otherwise.
+    """
+    # Convert the frame to RGB
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
+    # Process the frame using the pose detection model
+    results = mp_pose.process(frame_rgb)
+
+    # Example: Check if the pose of interest is present
+    if results.pose_landmarks is not None:
+        # You can add more sophisticated conditions based on pose landmarks
+        return True
+    else:
+        return False
+
+def extract_and_display_and_save_useful_frames_realtime(output_folder, frame_interval=20):
+    """
+    Extract frames from real-time camera feed, save useful frames as images, and display them using subplots.
     
     Parameters:
     - output_folder (str): Directory to save the extracted images.
     - frame_interval (int): Interval to capture frames.
     """
-    
     # Create the output folder in the current directory
     output_folder_path = os.path.join(os.getcwd(), output_folder)
     if not os.path.exists(output_folder_path):
@@ -23,6 +47,9 @@ def extract_and_display_frames_realtime(output_folder, frame_interval=20):
     extracted_count = 0
     frames = []
 
+    # Initialize mediapipe pose detection
+    mp_pose = mp.solutions.pose.Pose()
+
     while True:
         ret, frame = cap.read()
 
@@ -31,16 +58,12 @@ def extract_and_display_frames_realtime(output_folder, frame_interval=20):
             break
 
         if frame_count % frame_interval == 0:
-            img_name = f"frame_{frame_count}.png"
-            img_path = os.path.join(output_folder_path, img_name)
-            
-            # Convert frame from BGR to RGB for displaying with matplotlib
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            
-            cv2.imwrite(img_path, frame)
-            frames.append(frame_rgb)
-            extracted_count += 1
-            print(f"Extracted frame {frame_count} as {img_name}")
+            if is_useful_frame(frame, mp_pose):
+                img_name = f"useful_frame_{extracted_count}.png"
+                img_path = os.path.join(output_folder_path, img_name)
+                cv2.imwrite(img_path, frame)
+                extracted_count += 1
+                print(f"Saved useful frame {extracted_count} as {img_name}")
 
         frame_count += 1
 
@@ -63,7 +86,8 @@ def extract_and_display_frames_realtime(output_folder, frame_interval=20):
 
     cap.release()
     cv2.destroyAllWindows()
+    mp_pose.close()
 
 # Example usage:
-output_dir = "extracted_frames_realtime"
-extract_and_display_frames_realtime(output_dir, frame_interval=20)
+output_dir = "extracted_useful_frames_realtime"
+extract_and_display_and_save_useful_frames_realtime(output_dir, frame_interval=20)
