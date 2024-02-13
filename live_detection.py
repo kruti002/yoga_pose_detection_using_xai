@@ -5,11 +5,9 @@ import mediapipe as mp
 import pandas as pd
 import pyttsx4
 import multiprocessing as mtp
-
 from recommendations import check_pose_angle
 from landmarks import extract_landmarks
 from calc_angles import rangles
-
 
 def init_cam():
     cam = cv2.VideoCapture(0)
@@ -21,7 +19,6 @@ def init_cam():
     cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     return cam
 
-
 def get_pose_name(index):
     names = {
         0: "Adho Mukha Svanasana",
@@ -30,7 +27,6 @@ def get_pose_name(index):
         3: "Vrikshasana",
     }
     return str(names[index])
-
 
 def init_dicts():
     landmarks_points = {
@@ -64,9 +60,7 @@ def init_dicts():
     cols = col_names.copy()
     return cols, landmarks_points_array
 
-
 engine = pyttsx4.init()
-
 
 def tts(tts_q):
     while True:
@@ -77,7 +71,6 @@ def tts(tts_q):
         engine.say(message)
         engine.runAndWait()
     tts_q.task_done()
-
 
 def cv2_put_text(image, message):
     cv2.putText(
@@ -91,15 +84,13 @@ def cv2_put_text(image, message):
         cv2.LINE_AA
     )
 
-
-def destory(cam, tts_proc, tts_q):
+def destroy(cam, tts_proc, tts_q):
     cv2.destroyAllWindows()
     cam.release()
     tts_q.put(None)
     tts_q.close()
     tts_q.join_thread()
     tts_proc.join()
-
 
 if __name__ == "__main__":
     cam = init_cam()
@@ -108,10 +99,9 @@ if __name__ == "__main__":
     cols, landmarks_points_array = init_dicts()
     angles_df = pd.read_csv(r'C:\research_paper\research paper\yoga-pose-detection-correction-main\csv_files\poses_angles.csv')
     mp_drawing = mp.solutions.drawing_utils
-    mp_pose = mp.solutions.pose
+    mp_pose = mp.solutions.Pose(min_detection_confidence=0.5)
 
     tts_q = mtp.JoinableQueue()
-
     tts_proc = mtp.Process(target=tts, args=(tts_q, ))
     tts_proc.start()
 
@@ -128,7 +118,7 @@ if __name__ == "__main__":
 
         key = cv2.waitKey(1)
         if key == ord("q"):
-            destory(cam, tts_proc, tts_q)
+            destroy(cam, tts_proc, tts_q)
             break
 
         if result:
@@ -148,7 +138,7 @@ if __name__ == "__main__":
                     mp_pose.POSE_CONNECTIONS
                 )
 
-                if probabilities[0, prediction[0]] > 0.85:
+                if probabilities[0, prediction[0]] > 0.3:
                     cv2_put_text(
                         flipped,
                         get_pose_name(prediction[0])
@@ -159,14 +149,16 @@ if __name__ == "__main__":
                         prediction[0], angles, angles_df)
 
                     if time() > tts_last_exec:
-                        tts_q.put([
-                            suggestions[0]
-                        ])
+                        tts_q.put([suggestions[0]])
                         tts_last_exec = time() + 5
 
                 else:
                     cv2_put_text(
                         flipped,
-                        "No Pose Detected"
+                        "Low Confidence Pose Detection"
                     )
+
             cv2.imshow("Frame", flipped)
+
+    # Cleanup
+    destroy(cam, tts_proc, tts_q)

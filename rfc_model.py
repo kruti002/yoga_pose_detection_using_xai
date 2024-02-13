@@ -19,5 +19,4 @@ data_all_pose_model = RandomForestClassifier()
 data_all_pose_model.fit(X_train, y_train)
 
 print(classification_report(y_test, data_all_pose_model.predict(X_test)))
-
 pk.dump(data_all_pose_model, open(f"./models/poses.model", "wb"))
