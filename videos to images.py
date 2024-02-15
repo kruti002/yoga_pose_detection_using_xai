@@ -1,93 +1,51 @@
 import cv2
-import os
-import matplotlib.pyplot as plt
-import mediapipe as mp
+import numpy as np
 
-def is_useful_frame(frame, mp_pose):
-    """
-    Check if a frame contains a specific yoga pose.
-    
-    Parameters:
-    - frame (numpy.ndarray): Image frame.
-    - mp_pose (mediapipe.solutions.pose): Pose detection model.
-    
-    Returns:
-    - bool: True if the frame is useful, False otherwise.
-    """
-    # Convert the frame to RGB
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    
-    # Process the frame using the pose detection model
-    results = mp_pose.process(frame_rgb)
+def selective_image_extraction(frame):
+    # Convert the frame to grayscale
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Example: Check if the pose of interest is present
-    if results.pose_landmarks is not None:
-        # You can add more sophisticated conditions based on pose landmarks
-        return True
-    else:
-        return False
+    # Apply a threshold to obtain a binary image
+    _, binary_mask = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
 
-def extract_and_display_and_save_useful_frames_realtime(output_folder, frame_interval=20):
-    """
-    Extract frames from real-time camera feed, save useful frames as images, and display them using subplots.
-    
-    Parameters:
-    - output_folder (str): Directory to save the extracted images.
-    - frame_interval (int): Interval to capture frames.
-    """
-    # Create the output folder in the current directory
-    output_folder_path = os.path.join(os.getcwd(), output_folder)
-    if not os.path.exists(output_folder_path):
-        os.makedirs(output_folder_path)
+    # Apply morphological operations to remove small noise
+    kernel = np.ones((5, 5), np.uint8)
+    opening = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel, iterations=2)
 
+    # Invert the binary mask to get the background
+    background = cv2.bitwise_not(opening)
+
+    # Extract the user by bitwise AND operation with the original frame
+    result = cv2.bitwise_and(frame, frame, mask=background)
+
+    return result
+
+def capture_and_process_video():
     # Open the camera
     cap = cv2.VideoCapture(0)
 
-    frame_count = 0
-    extracted_count = 0
-    frames = []
-
-    # Initialize mediapipe pose detection
-    mp_pose = mp.solutions.pose.Pose()
-
     while True:
+        # Read a frame from the camera
         ret, frame = cap.read()
 
         # If frame read is unsuccessful, break the loop
         if not ret:
             break
 
-        if frame_count % frame_interval == 0:
-            if is_useful_frame(frame, mp_pose):
-                img_name = f"useful_frame_{extracted_count}.png"
-                img_path = os.path.join(output_folder_path, img_name)
-                cv2.imwrite(img_path, frame)
-                extracted_count += 1
-                print(f"Saved useful frame {extracted_count} as {img_name}")
+        # Apply Selective Image Extraction
+        processed_frame = selective_image_extraction(frame)
 
-        frame_count += 1
+        # Display the original and processed frames
+        cv2.imshow('Original Frame', frame)
+        cv2.imshow('Selective Image Extraction', processed_frame)
 
-        # Display frames using subplots
-        if extracted_count > 0 and extracted_count % 10 == 0:
-            rows = len(frames) // 2 + len(frames) % 2
-            fig, axs = plt.subplots(rows, 2, figsize=(10, 10))
+        # Break the loop when 'q' is pressed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
-            for i, ax in enumerate(axs.ravel()):
-                if i < len(frames):
-                    ax.imshow(frames[i])
-                    ax.set_title(f"Frame {i * frame_interval}")
-                    ax.axis('off')
-                else:
-                    ax.axis('off')
-
-            plt.tight_layout()
-            plt.show()
-            frames = []
-
+    # Release the camera and close all windows
     cap.release()
     cv2.destroyAllWindows()
-    mp_pose.close()
 
-# Example usage:
-output_dir = "extracted_useful_frames_realtime"
-extract_and_display_and_save_useful_frames_realtime(output_dir, frame_interval=20)
+if __name__ == "__main__":
+    capture_and_process_video()
