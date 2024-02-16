@@ -126,7 +126,7 @@ if __name__ == "__main__":
                     landmarks,
                     mp_pose.POSE_CONNECTIONS
                 )
-                if probabilities[0, prediction[0]] > 0.7:
+                if probabilities[0, prediction[0]] > 0.5:
                     cv2_put_text(
                         flipped,
                         get_pose_name(prediction[0])
