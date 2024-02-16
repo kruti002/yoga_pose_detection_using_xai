@@ -88,11 +88,11 @@ def destory(cam, tts_proc, tts_q):
 if __name__ == "__main__":
     cam = init_cam()
 
-    model = pk.load(open(r'C:\research_paper\research paper\yoga-pose-detection-correction-main\models\poses.model', "rb"))
+    model = pk.load(open(r'E:\Research_Paper\yoga_pose_detection_using_xai-main\yoga_pose_detection_using_xai-main\yoga_pose_detection_using_xai\models\poses.model', "rb"))
 
     cols, landmarks_points_array = init_dicts()
 
-    angles_df = pd.read_csv(r'C:\research_paper\research paper\yoga-pose-detection-correction-main\csv_files\poses_angles.csv')
+    angles_df = pd.read_csv(r'E:\Research_Paper\yoga_pose_detection_using_xai-main\yoga_pose_detection_using_xai-main\yoga_pose_detection_using_xai\csv_files\poses_angles.csv')
     mp_drawing = mp.solutions.drawing_utils
     mp_pose = mp.solutions.pose
 
