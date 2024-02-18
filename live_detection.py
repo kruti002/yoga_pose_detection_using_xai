@@ -20,9 +20,13 @@ def init_cam():
 def get_pose_name(index):
     names = {
         0: "Adho Mukha Svanasana",
-        1: "Phalakasana",
-        2: "Utkata Konasana",
-        3: "Vrikshasana",
+        1:"anjaneyasana",
+        2:"downdog",
+        3:"goddess",
+        4:"phalakasana",
+        5:"virabhadrasana ii",
+        6:"vriksasana",
+        7:"warrior 2"      
     }
     return str(names[index])
 def init_dicts():
