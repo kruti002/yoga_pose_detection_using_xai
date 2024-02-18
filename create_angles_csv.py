@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 import mediapipe as mp
@@ -80,8 +79,15 @@ for i in range(0, len(pose_dir_list)):
     for l in range(0, len(images_dir_list)):
         pre_list = []
         with mp_pose.Pose(static_image_mode=True, enable_segmentation=True) as pose:
-            image = cv2.imread(
-                f"{main_dir}/{pose_dir_list[i]}/{images_dir_list[l]}")
+            image_path = f"{main_dir}/{pose_dir_list[i]}/{images_dir_list[l]}"
+            image = cv2.imread(image_path)
+            
+            # Check if the image is loaded successfully
+            if image is None:
+                print(f"Failed to load image: {image_path}")
+                continue  # Skip to the next iteration
+
+            # Rest of your image processing code...
             result = pose.process(
                 cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
