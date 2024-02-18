@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 import warnings
 warnings.filterwarnings("ignore")
 
-data_pose = pd.read_csv(r'C:\research_paper\research paper\yoga-pose-detection-correction-main\csv_files\poses_data_pose.csv')
+data_pose = pd.read_csv(r'E:\Research_Paper\yoga_pose_detection_using_xai-main\yoga_pose_detection_using_xai-main\yoga_pose_detection_using_xai\csv_files\poses_data_pose.csv')
 print("Dataset shape:", data_pose.shape)
 features = data_pose.drop(["pose"], axis=1)
 target = data_pose[["pose"]]
