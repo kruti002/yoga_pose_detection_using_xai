@@ -19,13 +19,12 @@ def init_cam():
     return cam
 def get_pose_name(index):
     names = {
-        0: "Adho Mukha Svanasana",
-       1:"downdog",
-        2:"goddess",
-        3:"phalakasana",
-        4:"virabhadrasana ii",
-        5:"vriksasana",
-        6:"warrior 2"      
+        0: "downdog",
+        1:"goddess",
+        2:"phalakasana",
+        3:"virabhadrasana ii",
+        4:"vriksasana"
+            
     }
     return str(names[index])
 def init_dicts():
@@ -129,7 +128,7 @@ if __name__ == "__main__":
                     landmarks,
                     mp_pose.POSE_CONNECTIONS
                 )
-                if probabilities[0, prediction[0]] > 0.5:
+                if probabilities[0, prediction[0]] > 0.85:
                     cv2_put_text(
                         flipped,
                         get_pose_name(prediction[0])
