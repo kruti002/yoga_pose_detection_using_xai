@@ -21,9 +21,10 @@ def get_pose_name(index):
     names = {
         0: "downdog",
         1:"goddess",
-        2:"phalakasana",
-        3:"virabhadrasana ii",
-        4:"vriksasana"
+        2:"padmasana",
+        3:"phalakasana",
+        4:"virabhadrasana ii",
+        5:"vriksasana"
             
     }
     return str(names[index])
